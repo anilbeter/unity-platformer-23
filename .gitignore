@@ -7,3 +7,6 @@ Temp/
 UserSettings/
 *.csproj
 *.sln
+Assets/Sounds
+Assets/Sprites
+Assets/*.meta

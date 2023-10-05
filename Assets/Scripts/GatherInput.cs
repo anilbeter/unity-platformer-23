@@ -1,18 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GatherInput : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private Controls myControls;
+
+    public float valueX;
+
+    private void Awake()
     {
-        
+        myControls = new Controls();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-        
+        myControls.Player.Move.performed += StartMove;
+    }
+
+    private void StartMove(InputAction.CallbackContext ctx)
+    {
+        valueX = ctx.ReadValue<float>();
     }
 }

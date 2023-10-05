@@ -24,7 +24,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     ""name"": ""Controls"",
     ""maps"": [
         {
-            ""name"": ""Player"",
+            ""name"": ""UI"",
             ""id"": ""58ede09c-9d82-438c-a93a-65a95587c8f6"",
             ""actions"": [
                 {
@@ -52,7 +52,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""UI"",
+            ""name"": ""Player"",
             ""id"": ""28662538-e991-4244-8494-27de222635b2"",
             ""actions"": [
                 {
@@ -124,13 +124,13 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     ],
     ""controlSchemes"": []
 }");
-        // Player
-        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_Newaction = m_Player.FindAction("New action", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
-        m_UI_Jump = m_UI.FindAction("Jump", throwIfNotFound: true);
-        m_UI_Move = m_UI.FindAction("Move", throwIfNotFound: true);
+        m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
+        // Player
+        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
+        m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -189,63 +189,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Player
-    private readonly InputActionMap m_Player;
-    private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
-    private readonly InputAction m_Player_Newaction;
-    public struct PlayerActions
-    {
-        private @Controls m_Wrapper;
-        public PlayerActions(@Controls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Newaction => m_Wrapper.m_Player_Newaction;
-        public InputActionMap Get() { return m_Wrapper.m_Player; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
-        public void AddCallbacks(IPlayerActions instance)
-        {
-            if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
-            @Newaction.started += instance.OnNewaction;
-            @Newaction.performed += instance.OnNewaction;
-            @Newaction.canceled += instance.OnNewaction;
-        }
-
-        private void UnregisterCallbacks(IPlayerActions instance)
-        {
-            @Newaction.started -= instance.OnNewaction;
-            @Newaction.performed -= instance.OnNewaction;
-            @Newaction.canceled -= instance.OnNewaction;
-        }
-
-        public void RemoveCallbacks(IPlayerActions instance)
-        {
-            if (m_Wrapper.m_PlayerActionsCallbackInterfaces.Remove(instance))
-                UnregisterCallbacks(instance);
-        }
-
-        public void SetCallbacks(IPlayerActions instance)
-        {
-            foreach (var item in m_Wrapper.m_PlayerActionsCallbackInterfaces)
-                UnregisterCallbacks(item);
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Clear();
-            AddCallbacks(instance);
-        }
-    }
-    public PlayerActions @Player => new PlayerActions(this);
-
     // UI
     private readonly InputActionMap m_UI;
     private List<IUIActions> m_UIActionsCallbackInterfaces = new List<IUIActions>();
-    private readonly InputAction m_UI_Jump;
-    private readonly InputAction m_UI_Move;
+    private readonly InputAction m_UI_Newaction;
     public struct UIActions
     {
         private @Controls m_Wrapper;
         public UIActions(@Controls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Jump => m_Wrapper.m_UI_Jump;
-        public InputAction @Move => m_Wrapper.m_UI_Move;
+        public InputAction @Newaction => m_Wrapper.m_UI_Newaction;
         public InputActionMap Get() { return m_Wrapper.m_UI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -255,22 +207,16 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_UIActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_UIActionsCallbackInterfaces.Add(instance);
-            @Jump.started += instance.OnJump;
-            @Jump.performed += instance.OnJump;
-            @Jump.canceled += instance.OnJump;
-            @Move.started += instance.OnMove;
-            @Move.performed += instance.OnMove;
-            @Move.canceled += instance.OnMove;
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
         }
 
         private void UnregisterCallbacks(IUIActions instance)
         {
-            @Jump.started -= instance.OnJump;
-            @Jump.performed -= instance.OnJump;
-            @Jump.canceled -= instance.OnJump;
-            @Move.started -= instance.OnMove;
-            @Move.performed -= instance.OnMove;
-            @Move.canceled -= instance.OnMove;
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
         }
 
         public void RemoveCallbacks(IUIActions instance)
@@ -288,11 +234,65 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
-    public interface IPlayerActions
+
+    // Player
+    private readonly InputActionMap m_Player;
+    private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
+    private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Move;
+    public struct PlayerActions
+    {
+        private @Controls m_Wrapper;
+        public PlayerActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Move => m_Wrapper.m_Player_Move;
+        public InputActionMap Get() { return m_Wrapper.m_Player; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
+        public void AddCallbacks(IPlayerActions instance)
+        {
+            if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
+        }
+
+        private void UnregisterCallbacks(IPlayerActions instance)
+        {
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
+        }
+
+        public void RemoveCallbacks(IPlayerActions instance)
+        {
+            if (m_Wrapper.m_PlayerActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IPlayerActions instance)
+        {
+            foreach (var item in m_Wrapper.m_PlayerActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_PlayerActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public PlayerActions @Player => new PlayerActions(this);
+    public interface IUIActions
     {
         void OnNewaction(InputAction.CallbackContext context);
     }
-    public interface IUIActions
+    public interface IPlayerActions
     {
         void OnJump(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
